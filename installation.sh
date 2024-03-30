@@ -9,7 +9,8 @@ CONFIG_DIR_PATH="$HOME/.config/com_pal"
 
 VOCAB_LINK="https://openaipublic.blob.core.windows.net/gpt-2/encodings/main/vocab.bpe"
 ENCODER_LINK="https://openaipublic.blob.core.windows.net/gpt-2/encodings/main/encoder.json"
-GPT_MODEL="https://gpt4all.io/models/gguf/gpt4all-falcon-newbpe-q4_0.gguf"
+GPT_MODEL_LINK="https://gpt4all.io/models/gguf/gpt4all-falcon-newbpe-q4_0.gguf"
+WHISPER_MODEL_LINK="https://openaipublic.azureedge.net/main/whisper/models/ed3a0b6b1c0edf879ad9b11b1af5a0e6ab5db9205f891f668f8b0e6c6326e34e/base.pt"
 
 # Colors
 BLUE="\033[34;1m"
@@ -59,7 +60,8 @@ get_resources() {
     mkdir -p "$CONFIG_DIR_PATH"
     curl -o "$CONFIG_DIR_PATH/vocab.bpe" "$VOCAB_LINK"
     curl -o "$CONFIG_DIR_PATH/encoder.json" "$ENCODER_LINK"
-    curl -o "$CONFIG_DIR_PATH/gpt4all-falcon-newbpe-q4_0.gguf" "$GPT_MODEL"
+    curl -o "$CONFIG_DIR_PATH/gpt4all-falcon-newbpe-q4_0.gguf" "$GPT_MODEL_LINK"
+    curl -o "$CONFIG_DIR_PATH/base.pt" "$WHISPER_MODEL_LINK"
 }
 
 # Installation steps ---------->
