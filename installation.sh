@@ -9,6 +9,7 @@ CONFIG_DIR_PATH="$HOME/.config/com_pal"
 
 VOCAB_LINK="https://openaipublic.blob.core.windows.net/gpt-2/encodings/main/vocab.bpe"
 ENCODER_LINK="https://openaipublic.blob.core.windows.net/gpt-2/encodings/main/encoder.json"
+GPT_MODEL="https://gpt4all.io/models/gguf/gpt4all-falcon-newbpe-q4_0.gguf"
 
 # Colors
 BLUE="\033[34;1m"
@@ -58,6 +59,7 @@ get_resources() {
     mkdir -p "$CONFIG_DIR_PATH"
     curl -o "$CONFIG_DIR_PATH/vocab.bpe" "$VOCAB_LINK"
     curl -o "$CONFIG_DIR_PATH/encoder.json" "$ENCODER_LINK"
+    curl -o "$CONFIG_DIR_PATH/gpt4all-falcon-newbpe-q4_0.gguf" "$GPT_MODEL"
 }
 
 # Installation steps ---------->
@@ -65,6 +67,7 @@ clear_screen
 echo -e "${BLUE}Installation start${NC}"
 clean_environment
 install_if_not_installed virtualenv
+install_if_not_installed portaudio19-dev
 create_virtualenv "$1"
 
 source "$VENV_DIR/bin/activate"
