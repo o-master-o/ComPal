@@ -1,32 +1,11 @@
 import os
-import sys
 import time
-import numpy as np
-from scipy.io import wavfile
-from scipy.io.wavfile import read as wav_read
-from com_pal.variables import GTP_MODEL_PATH
-from gtts import gTTS
-from io import BytesIO
-from pydub import AudioSegment
-from pydub.playback import play
+
 import speech_recognition
 import whisper
-from gpt4all import GPT4All
-import pyttsx3
-import pyautogui
 
+from com_pal.voices import GoogleVoice
 
-def speak_text(text, lang='en'):
-    tts = gTTS(text=text, lang=lang)
-    with BytesIO() as fp:
-        tts.write_to_fp(fp)
-        fp.seek(0)
-        audio = AudioSegment.from_file(fp, format="mp3")
-    play(audio)
-
-
-# speak_text("hello, How are you. How can I help you")
-engine = pyttsx3.init()
 source = speech_recognition.Microphone()
 recognizer = speech_recognition.Recognizer()
 # model = GPT4All(GTP_MODEL_PATH, allow_download=False)
@@ -37,8 +16,9 @@ base_model = whisper.load_model(base_model_path)
 
 class PalAI:
 
-    def __init__(self, name):
+    def __init__(self, name, voice):
         self.name = name
+        self.voice = voice
         self.user_name = None
         self._should_run = True
 
@@ -46,10 +26,7 @@ class PalAI:
         self._introduce_each_other()
         while self._should_run:
             self._assist_user()
-        self.respond("Goodbye.")
-
-    def _build_trigger_phrase(self):
-        return f"Hey {self.name}"
+        self.respond(f"Goodbye {self.user_name}. It was pleasure to serve you")
 
     def _introduce_each_other(self):
         self.respond(f"Hello, My name is {self.name}. I am your personal assistant")
@@ -60,13 +37,7 @@ class PalAI:
         output = self.listen_user()
         if not output:
             return
-        print('====')
-        print(output)
-        print(f'goodbye, {self.name}.')
-        print(f'goodbye, {self.name.lower()}' in output)
-        print('====')
-        if f'goodbye, {self.name.lower()}.' in output:
-            print('exit')
+        if f'goodbye, {self.name.lower()}' in output:
             self._should_run = False
             return
 
@@ -82,12 +53,11 @@ class PalAI:
         return self.name.lower() in output
 
     def respond(self, text):
-        engine.say(text)
-        engine.runAndWait()
+        self.voice.say(text)
 
     def listen_user(self):
         with source:
-            print("Listening for commands...")
+            print("Listening...")
             recognizer.adjust_for_ambient_noise(source)
             audio = recognizer.listen(source)
 
@@ -113,7 +83,8 @@ class PalAI:
 
     def _get_user_name(self):
         self.respond('May I ask your name?')
-        name = self._find_name_after_phrase(self.listen_user(), phrase="is ")
+        output = self.listen_user()
+        name = self._find_name_after_phrase(output, phrase="is ")
         while name is None:
             self.respond("I'm sorry. I did mot understand you, Could you repeat your name?")
             name = self._find_name_after_phrase(self.listen_user(), phrase="my name is ")
@@ -136,4 +107,4 @@ class PalAI:
 
 
 if __name__ == "__main__":
-    PalAI("Dude").run()
+    PalAI("Dude", GoogleVoice('en')).run()
