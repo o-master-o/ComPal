@@ -13,9 +13,10 @@ from com_pal.voices import GoogleVoice
 source = speech_recognition.Microphone()
 recognizer = speech_recognition.Recognizer()
 # model = GPT4All(GTP_MODEL_PATH, allow_download=False)
+
 # base_model_path = os.path.expanduser('/home/yoda/.config/com_pal/base.pt')
-base_model_path = os.path.expanduser('/home/yoda/.config/com_pal/tiny.pt')
-base_model = whisper.load_model(base_model_path)
+# base_model_path = os.path.expanduser('/home/yoda/.config/com_pal/tiny.pt')
+# base_model = whisper.load_model(base_model_path)
 
 
 class PalAI:
@@ -71,17 +72,13 @@ class PalAI:
         try:
             with open("command.wav", "wb") as f:
                 f.write(audio.get_wav_data())
-            command = base_model.transcribe("command.wav", fp16=False)
-            if command and command['text']:
-                print("You said:", command['text'])
-                return command['text'].lower()
-            return None
         except speech_recognition.UnknownValueError:
             print("Could not understand audio. Please try again.")
             return None
         except speech_recognition.RequestError:
             print("Unable to access the Google Speech Recognition API.")
             return None
+        return self.speech_recogniser.transcript("command.wav")
 
     def perform_command(self, command):
         if command:
