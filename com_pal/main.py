@@ -14,10 +14,6 @@ source = speech_recognition.Microphone()
 recognizer = speech_recognition.Recognizer()
 # model = GPT4All(GTP_MODEL_PATH, allow_download=False)
 
-# base_model_path = os.path.expanduser('/home/yoda/.config/com_pal/base.pt')
-# base_model_path = os.path.expanduser('/home/yoda/.config/com_pal/tiny.pt')
-# base_model = whisper.load_model(base_model_path)
-
 
 class PalAI:
 
@@ -45,7 +41,7 @@ class PalAI:
         output = self.listen_user()
         if not output:
             return
-        if f'goodbye, {self.name.lower()}' in output:
+        if self._farewell_in(output):
             self._should_run = False
             return
 
@@ -57,6 +53,9 @@ class PalAI:
 
         time.sleep(1)
 
+    def _farewell_in(self, output):
+        return f'goodbye, {self.name.lower()}' in output or f'goodbye {self.name.lower()}' in output
+
     def address_assistant(self, output):
         return self.name.lower() in output
 
@@ -64,6 +63,7 @@ class PalAI:
         self.voice.say(text)
 
     def listen_user(self):
+        tmp_wav_file_path = f"{CONFIG_DIR_PATH}/command.wav"
         with source:
             print("Listening...")
             recognizer.adjust_for_ambient_noise(source)
@@ -78,6 +78,7 @@ class PalAI:
         except speech_recognition.RequestError:
             print("Unable to access the Google Speech Recognition API.")
             return None
+        # self.hearing.listen(output_file_path=tmp_wav_file_path)
         return self.speech_recogniser.transcript("command.wav")
 
     def perform_command(self, command):
