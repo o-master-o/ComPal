@@ -64,22 +64,8 @@ class PalAI:
 
     def listen_user(self):
         tmp_wav_file_path = f"{CONFIG_DIR_PATH}/command.wav"
-        with source:
-            print("Listening...")
-            recognizer.adjust_for_ambient_noise(source)
-            audio = recognizer.listen(source)
-
-        try:
-            with open("command.wav", "wb") as f:
-                f.write(audio.get_wav_data())
-        except speech_recognition.UnknownValueError:
-            print("Could not understand audio. Please try again.")
-            return None
-        except speech_recognition.RequestError:
-            print("Unable to access the Google Speech Recognition API.")
-            return None
-        # self.hearing.listen(output_file_path=tmp_wav_file_path)
-        return self.speech_recogniser.transcript("command.wav")
+        self.hearing.listen(output_file_path=tmp_wav_file_path)
+        return self.speech_recogniser.transcript(tmp_wav_file_path)
 
     def perform_command(self, command):
         if command:
