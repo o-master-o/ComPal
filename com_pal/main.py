@@ -1,28 +1,23 @@
-import os
 import time
 
-import speech_recognition
-import whisper
 
 from com_pal.hearing import SpeechRecognitionHearing
 from com_pal.parsers import TxtParser
 from com_pal.speech_recognizers import OpenaiWhisper
-from com_pal.variables import CONFIG_DIR_PATH
+from com_pal.variables import CONFIG_DIR_PATH, GTP_MODEL_PATH, TINY_SPEECH_RECOGNITION_MODEL
 from com_pal.voices import GoogleVoice
-
-source = speech_recognition.Microphone()
-recognizer = speech_recognition.Recognizer()
-# model = GPT4All(GTP_MODEL_PATH, allow_download=False)
+from gpt4all import GPT4All
 
 
 class PalAI:
 
-    def __init__(self, name, voice, hearing, speech_recogniser, txt_parser):
+    def __init__(self, name, voice, hearing, speech_recogniser, txt_parser, assistant):
         self.name = name
         self.voice = voice
         self.hearing = hearing
         self.speech_recogniser = speech_recogniser
         self.txt_parser = txt_parser
+        self.assistant = assistant
         self.user_name = None
         self._should_run = True
 
@@ -39,25 +34,37 @@ class PalAI:
 
     def _assist_user(self):
         output = self.listen_user()
+
         if not output:
             return
+
         if self._farewell_in(output):
             self._should_run = False
             return
 
-        if self.address_assistant(output):
+        if self.address_assistant_in(output):
             self.respond(f'Yes {self.user_name}, right away')
             command = self.listen_user()
             self.perform_command(command)
             self.respond(f'Command is done')
+
+        if self.question_in(output):
+            self.respond("I'm listening. What is your question")
+            output = self.listen_user()
+            out = self.assistant.generate(output, max_tokens=200)
+            print("Output: ", out)
+            self.respond(out)
 
         time.sleep(1)
 
     def _farewell_in(self, output):
         return f'goodbye, {self.name.lower()}' in output or f'goodbye {self.name.lower()}' in output
 
-    def address_assistant(self, output):
+    def address_assistant_in(self, output):
         return self.name.lower() in output
+
+    def question_in(self, output):
+        return 'question' in output
 
     def respond(self, text):
         self.voice.say(text)
@@ -79,16 +86,16 @@ class PalAI:
         while name is None:
             self.respond("I'm sorry. I did not understand you, Could you repeat your name?")
             name = self.txt_parser.next_word_after_phrase(self.listen_user(), phrase="my name is ")
-        print(f'fetched name {name}')
         return name
 
 
 if __name__ == "__main__":
     PalAI(
-        name="Anna",
+        name="Bob",
         voice=GoogleVoice('en'),
         hearing=SpeechRecognitionHearing(),
-        speech_recogniser=OpenaiWhisper('/home/yoda/.config/com_pal/tiny.pt'),
-        txt_parser=TxtParser
+        speech_recogniser=OpenaiWhisper(TINY_SPEECH_RECOGNITION_MODEL),
+        txt_parser=TxtParser,
+        assistant=GPT4All(GTP_MODEL_PATH, allow_download=False)
     ).run()
 
