@@ -4,6 +4,10 @@ import time
 import speech_recognition
 import whisper
 
+from com_pal.hearing import SpeechRecognitionHearing
+from com_pal.parsers import TxtParser
+from com_pal.speech_recognizers import OpenaiWhisper
+from com_pal.variables import CONFIG_DIR_PATH
 from com_pal.voices import GoogleVoice
 
 source = speech_recognition.Microphone()
@@ -16,9 +20,12 @@ base_model = whisper.load_model(base_model_path)
 
 class PalAI:
 
-    def __init__(self, name, voice):
+    def __init__(self, name, voice, hearing, speech_recogniser, txt_parser):
         self.name = name
         self.voice = voice
+        self.hearing = hearing
+        self.speech_recogniser = speech_recogniser
+        self.txt_parser = txt_parser
         self.user_name = None
         self._should_run = True
 
@@ -84,27 +91,20 @@ class PalAI:
     def _get_user_name(self):
         self.respond('May I ask your name?')
         output = self.listen_user()
-        name = self._find_name_after_phrase(output, phrase="is ")
+        name = self.txt_parser.next_word_after_phrase(output, phrase="is ")
         while name is None:
-            self.respond("I'm sorry. I did mot understand you, Could you repeat your name?")
-            name = self._find_name_after_phrase(self.listen_user(), phrase="my name is ")
+            self.respond("I'm sorry. I did not understand you, Could you repeat your name?")
+            name = self.txt_parser.next_word_after_phrase(self.listen_user(), phrase="my name is ")
         print(f'fetched name {name}')
         return name
 
-    def _find_name_after_phrase(self, text, phrase):
-        start_index = text.find(phrase)
-
-        if start_index != -1:
-            next_word_start = start_index + len(phrase)
-            text_after_phrase = text[next_word_start:]
-            next_word_end = text_after_phrase.find(" ")
-            if next_word_end == -1:
-                next_word = text_after_phrase
-            else:
-                next_word = text_after_phrase[:next_word_end]
-            return next_word
-        return None
-
 
 if __name__ == "__main__":
-    PalAI("Dude", GoogleVoice('en')).run()
+    PalAI(
+        name="Anna",
+        voice=GoogleVoice('en'),
+        hearing=SpeechRecognitionHearing(),
+        speech_recogniser=OpenaiWhisper('/home/yoda/.config/com_pal/tiny.pt'),
+        txt_parser=TxtParser
+    ).run()
+
