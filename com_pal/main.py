@@ -1,10 +1,11 @@
+import tempfile
 import time
 
 
 from com_pal.hearing import SpeechRecognitionHearing
 from com_pal.parsers import TxtParser
 from com_pal.speech_recognizers import OpenaiWhisper
-from com_pal.variables import CONFIG_DIR_PATH, GTP_MODEL_PATH, TINY_SPEECH_RECOGNITION_MODEL
+from com_pal.variables import GTP_MODEL_PATH, TINY_SPEECH_RECOGNITION_MODEL
 from com_pal.voices import GoogleVoice
 from gpt4all import GPT4All
 
@@ -70,9 +71,9 @@ class PalAI:
         self._voice.say(text)
 
     def listen_user(self):
-        tmp_wav_file_path = f"{CONFIG_DIR_PATH}/command.wav"
-        self._hearing.listen(output_file_path=tmp_wav_file_path)
-        return self._speech_recogniser.transcript(tmp_wav_file_path)
+        with tempfile.NamedTemporaryFile() as tmp_file:
+            self._hearing.listen(output_file_path=tmp_file.name)
+            return self._speech_recogniser.transcript(tmp_file.name)
 
     def perform_command(self, command):
         if command:
