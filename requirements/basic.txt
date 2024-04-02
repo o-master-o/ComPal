@@ -2,5 +2,7 @@ openai-whisper
 gTTS
 gpt4all
 pyaudio
+pydub
+pyttsx3
 SpeechRecognition
 pyautogui
