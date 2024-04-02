@@ -9,7 +9,7 @@
 ## Features
 
 - **Information Retrieval**: Provides answers to questions, explanations on a wide range of topics, and quick facts lookup.
-- **Task Management**: Helps you manage your to-do lists, set reminders, and track your tasks efficiently.
+- **Task Management**: Helps you manage your tasks efficiently.
 
 ## Installation
 
